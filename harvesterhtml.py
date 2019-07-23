@@ -5,57 +5,72 @@ from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
-import browsercookie
+import browser_cookie3
 
 
 if len(sys.argv) < 4:
-    sys.exit("Not enough argument, usage: harvester novel_index_url start_chapter end_chapter")
+    sys.exit(
+        "Not enough argument, usage: harvester "
+        "novel_index_url start_chapter end_chapter")
 
-cj = browsercookie.firefox()
+cj = browser_cookie3.firefox()
 
 headers = {
-    'User-Agent' : 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0',
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0)'
+                  'Gecko/20100101 Firefox/58.0',
 }
+
+
 def get_page(url):
     try:
-        with closing(get(url, headers=headers, cookies=cj, stream=True)) as resp:
+        with closing(get(url,
+                         headers=headers,
+                         cookies=cj,
+                         stream=True)) as resp:
             if is_good_response(resp):
                 return resp.content
             else:
                 return None
-                
+
     except RequestException as e:
-        log_error("Error during request to {0} : {1}".format(url,str(e)))
+        log_error("Error during request to {0} : {1}".format(url, str(e)))
         return None
-        
+
+
 def is_good_response(resp):
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200
             and content_type is not None
             and content_type.find('html') > -1)
-            
+
+
 def log_error(e):
     print(e)
-    
+
+
 def get_subtitle(html):
     for p in html.select("p.novel_subtitle"):
         subtitle = (p.text)
-    return subtitle
-    
+        return subtitle
+
+
 def novel_content(html):
     for div in html.select("div#novel_honbun"):
-         content = div
-    return content
-    
+        content = div
+        return content
+
+
 def html_builder(title, html, ch):
     if ch == 1:
-        prev_link = ""
+        prev_link = " "
     else:
-        prev_link = '<a href="' + str(int(ch)-1).zfill(3) + '.html">Prev Chapter</a>'
+        prev_link = '<a href="' + str(int(ch)-1).zfill(3) + \
+                    '.html">Prev Chapter</a>'
     if ch == int(chx):
-        next_link = ""
+        next_link = " "
     else:
-        next_link = '<a href="' + str(int(ch)+1).zfill(3) + '.html">Next Chapter</a>'
+        next_link = '<a href="' + str(int(ch)+1).zfill(3) + \
+                    '.html">Next Chapter</a>'
     contents = novel_content(html)
     html_str = """<html>
 <head>
@@ -66,7 +81,7 @@ def html_builder(title, html, ch):
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container"> 
+<div class="container">
 <div class="row">
 <h1 class="text-center">""" + title + """</h1>
 <hr>
@@ -94,4 +109,3 @@ for ch in range(int(ch0), int(chx)+1):
     print("Downloading chapter " + str(ch) + " - " + html.title.string)
     with open(str(ch).zfill(3) + ".html", "w") as text_file:
         print(f"{html_builder(get_subtitle(html), html, ch)}", file=text_file)
-    
