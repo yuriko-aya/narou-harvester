@@ -39,9 +39,9 @@ def get_page(url):
 
 def is_good_response(resp):
     content_type = resp.headers['Content-Type'].lower()
-    return (resp.status_code == 200
-            and content_type is not None
-            and content_type.find('html') > -1)
+    return (resp.status_code == 200 and
+            content_type is not None and
+            content_type.find('html') > -1)
 
 
 def log_error(e):
@@ -64,12 +64,12 @@ def html_builder(title, html, ch):
     if ch == 1:
         prev_link = " "
     else:
-        prev_link = '<a href="' + str(int(ch)-1).zfill(3) + \
+        prev_link = '<a href="' + str(int(ch) - 1).zfill(3) + \
                     '.html">Prev Chapter</a>'
     if ch == int(chx):
         next_link = " "
     else:
-        next_link = '<a href="' + str(int(ch)+1).zfill(3) + \
+        next_link = '<a href="' + str(int(ch) + 1).zfill(3) + \
                     '.html">Next Chapter</a>'
     contents = novel_content(html)
     html_str = """<html>
@@ -103,7 +103,7 @@ url = (sys.argv[1])
 ch0 = (sys.argv[2])
 chx = (sys.argv[3])
 
-for ch in range(int(ch0), int(chx)+1):
+for ch in range(int(ch0), int(chx) + 1):
     raw_html = get_page(url + str(ch))
     html = BeautifulSoup(raw_html, "html.parser")
     print("Downloading chapter " + str(ch) + " - " + html.title.string)
